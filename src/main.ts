@@ -79,7 +79,9 @@ const world = new RAPIER.World({ x: 0, y: -25, z: 0 });
 const level = isOutdoor ? buildOutdoorLevel(scene, world) : buildLevel(scene, world);
 const player = createPlayer(world, level.spawn);
 for (const ep of level.enemySpawns) spawnEnemy(scene, ep, isOutdoor ? 'bite' : 'classic');
-const totalEnemies = enemies.length;
+const regularEnemyCount = enemies.length;
+const totalEnemies = regularEnemyCount + (isOutdoor ? 1 : 0);
+let bossSpawned = false;
 
 if (isOutdoor) {
   createPortal(scene, 0, -6, 'indoor');
@@ -293,6 +295,14 @@ renderer.setAnimationLoop(() => {
     lastPos.set(pos.x, 0, pos.z);
   }
 
+  if (isOutdoor && !bossSpawned && kills >= regularEnemyCount && regularEnemyCount > 0) {
+    bossSpawned = true;
+    spawnEnemy(scene, { x: 0, y: 0, z: -22 }, 'bite-boss');
+    audio.playEnemyHurt(2);
+    showMessage('LE BOSS APPARAÎT', 'Bonne chance');
+    setTimeout(() => messageEl.classList.add('hidden'), 1800);
+  }
+
   if (player.alive && player.hp <= 0) {
     player.alive = false;
     gameOver = true;
@@ -300,12 +310,6 @@ renderer.setAnimationLoop(() => {
     audio.stopMusic(0.4);
     audio.playGameOver();
     showMessage('VOUS ÊTES MORT', 'Clic pour recommencer');
-  } else if (!gameOver && kills === totalEnemies && totalEnemies > 0) {
-    gameOver = true;
-    document.exitPointerLock();
-    audio.stopMusic(1.0);
-    audio.playVictory();
-    showMessage('NIVEAU TERMINÉ', `${kills} ennemis éliminés — clic pour relancer`);
   }
 
   refreshHud();

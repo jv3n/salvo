@@ -227,6 +227,56 @@ export function enemyTextureBite(state: 'idle' | 'hurt' | 'dead'): THREE.CanvasT
   });
 }
 
+export function enemyTextureBoss(state: 'idle' | 'hurt' | 'dead'): THREE.CanvasTexture {
+  return makeCanvasTexture(128, (ctx) => {
+    ctx.clearRect(0, 0, 128, 128);
+    if (state === 'dead') {
+      ctx.fillStyle = '#4a2e14';
+      ctx.fillRect(20, 104, 72, 16);
+      ctx.beginPath();
+      ctx.arc(92, 112, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2a1a08';
+      ctx.beginPath();
+      ctx.arc(26, 118, 8, 0, Math.PI * 2);
+      ctx.arc(40, 118, 8, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+    const main = state === 'hurt' ? '#a04018' : '#6a4220';
+    const shade = state === 'hurt' ? '#5a200a' : '#3a2410';
+    ctx.fillStyle = main;
+    ctx.fillRect(48, 44, 32, 64);
+    ctx.beginPath();
+    ctx.arc(64, 36, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = shade;
+    ctx.fillRect(48, 44, 6, 64);
+    ctx.fillStyle = shade;
+    ctx.beginPath();
+    ctx.arc(40, 114, 13, 0, Math.PI * 2);
+    ctx.arc(88, 114, 13, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = main;
+    ctx.beginPath();
+    ctx.arc(44, 110, 10, 0, Math.PI * 2);
+    ctx.arc(84, 110, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ff3030';
+    ctx.fillRect(54, 28, 6, 6);
+    ctx.fillRect(68, 28, 6, 6);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(56, 30, 2, 4);
+    ctx.fillRect(70, 30, 2, 4);
+    ctx.fillStyle = '#1a0505';
+    ctx.fillRect(54, 42, 20, 5);
+    ctx.fillStyle = '#ddd';
+    ctx.fillRect(57, 42, 2, 4);
+    ctx.fillRect(63, 42, 2, 4);
+    ctx.fillRect(69, 42, 2, 4);
+  });
+}
+
 export function shotgunTexture(firing: boolean): THREE.CanvasTexture {
   return makeCanvasTexture(128, (ctx) => {
     ctx.clearRect(0, 0, 128, 128);

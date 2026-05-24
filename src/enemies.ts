@@ -1,14 +1,22 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
-import { enemyTexture, enemyTextureBite } from './textures';
+import { enemyTexture, enemyTextureBite, enemyTextureBoss } from './textures';
 import type { Player } from './player';
 
-export type EnemyVariant = 'classic' | 'bite';
+export type EnemyVariant = 'classic' | 'bite' | 'bite-boss';
 
 type EnemyTextures = {
   idle: THREE.CanvasTexture;
   hurt: THREE.CanvasTexture;
   dead: THREE.CanvasTexture;
+};
+
+type VariantConfig = {
+  textures: EnemyTextures;
+  hp: number;
+  damage: number;
+  scale: number;
+  attackRange: number;
 };
 
 export type Enemy = {
@@ -17,29 +25,54 @@ export type Enemy = {
   alive: boolean;
   hurtTime: number;
   attackCooldown: number;
+  damage: number;
+  attackRange: number;
+  scale: number;
   textures: EnemyTextures;
 };
 
 export const enemies: Enemy[] = [];
 
-const textureCache: Record<EnemyVariant, EnemyTextures> = {
+const variants: Record<EnemyVariant, VariantConfig> = {
   classic: {
-    idle: enemyTexture('idle'),
-    hurt: enemyTexture('hurt'),
-    dead: enemyTexture('dead'),
+    textures: {
+      idle: enemyTexture('idle'),
+      hurt: enemyTexture('hurt'),
+      dead: enemyTexture('dead'),
+    },
+    hp: 50,
+    damage: 8,
+    scale: 1,
+    attackRange: 1.4,
   },
   bite: {
-    idle: enemyTextureBite('idle'),
-    hurt: enemyTextureBite('hurt'),
-    dead: enemyTextureBite('dead'),
+    textures: {
+      idle: enemyTextureBite('idle'),
+      hurt: enemyTextureBite('hurt'),
+      dead: enemyTextureBite('dead'),
+    },
+    hp: 50,
+    damage: 8,
+    scale: 1,
+    attackRange: 1.4,
+  },
+  'bite-boss': {
+    textures: {
+      idle: enemyTextureBoss('idle'),
+      hurt: enemyTextureBoss('hurt'),
+      dead: enemyTextureBoss('dead'),
+    },
+    hp: 350,
+    damage: 18,
+    scale: 2.6,
+    attackRange: 2.4,
   },
 };
 
+const BASE_SPRITE = 1.4;
 const SPEED = 1.8;
-const ATTACK_RANGE = 1.4;
 const ATTACK_COOLDOWN = 1.0;
 const SIGHT_RANGE = 18;
-const HP = 50;
 const SPRITE_HALF = 0.7;
 
 export function spawnEnemy(
@@ -47,13 +80,24 @@ export function spawnEnemy(
   pos: { x: number; y: number; z: number },
   variant: EnemyVariant = 'classic',
 ) {
-  const textures = textureCache[variant];
-  const mat = new THREE.SpriteMaterial({ map: textures.idle, transparent: true, alphaTest: 0.5 });
+  const cfg = variants[variant];
+  const mat = new THREE.SpriteMaterial({ map: cfg.textures.idle, transparent: true, alphaTest: 0.5 });
   const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(1.4, 1.4, 1);
-  sprite.position.set(pos.x, pos.y + SPRITE_HALF, pos.z);
+  const size = BASE_SPRITE * cfg.scale;
+  sprite.scale.set(size, size, 1);
+  sprite.position.set(pos.x, pos.y + SPRITE_HALF * cfg.scale, pos.z);
   scene.add(sprite);
-  enemies.push({ sprite, hp: HP, alive: true, hurtTime: 0, attackCooldown: 0, textures });
+  enemies.push({
+    sprite,
+    hp: cfg.hp,
+    alive: true,
+    hurtTime: 0,
+    attackCooldown: 0,
+    damage: cfg.damage,
+    attackRange: cfg.attackRange,
+    scale: cfg.scale,
+    textures: cfg.textures,
+  });
 }
 
 export function updateEnemies(
@@ -77,7 +121,7 @@ export function updateEnemies(
     const dz = playerPos.z - e.sprite.position.z;
     const dist = Math.hypot(dx, dz);
 
-    if (dist > 0.01 && dist < SIGHT_RANGE && dist > ATTACK_RANGE) {
+    if (dist > 0.01 && dist < SIGHT_RANGE && dist > e.attackRange) {
       const step = SPEED * dt;
       const dirx = dx / dist;
       const dirz = dz / dist;
@@ -94,8 +138,8 @@ export function updateEnemies(
     }
 
     e.attackCooldown -= dt;
-    if (dist < ATTACK_RANGE && e.attackCooldown <= 0 && player.alive) {
-      player.hp -= 8;
+    if (dist < e.attackRange && e.attackCooldown <= 0 && player.alive) {
+      player.hp -= e.damage;
       e.attackCooldown = ATTACK_COOLDOWN;
     }
   }
@@ -108,8 +152,8 @@ export function hitEnemy(e: Enemy, damage: number): boolean {
     const mat = e.sprite.material as THREE.SpriteMaterial;
     mat.map = e.textures.dead;
     mat.needsUpdate = true;
-    e.sprite.scale.set(1.4, 0.5, 1);
-    e.sprite.position.y = 0.25;
+    e.sprite.scale.set(BASE_SPRITE * e.scale, 0.5 * e.scale, 1);
+    e.sprite.position.y = 0.25 * e.scale;
     return true;
   }
   const mat = e.sprite.material as THREE.SpriteMaterial;

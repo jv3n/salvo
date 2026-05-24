@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salvo</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      canvas {
+        display: block;
+      }
+
+      #help {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        color: #ffdd66;
+        text-shadow: 0 1px 2px #000;
+        pointer-events: none;
+        line-height: 1.6;
+      }
+      #help kbd {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-family: inherit;
+        color: #fff;
+      }
+
+      #crosshair {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 18px;
+        height: 18px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+      #crosshair::before,
+      #crosshair::after {
+        content: '';
+        position: absolute;
+        background: #ffdd66;
+        opacity: 0.85;
+      }
+      #crosshair::before {
+        left: 50%;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        transform: translateX(-50%);
+      }
+      #crosshair::after {
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        transform: translateY(-50%);
+      }
+
+      #hud {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 16px;
+        display: flex;
+        gap: 36px;
+        justify-content: center;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 22px;
+        letter-spacing: 1px;
+        color: #ffdd66;
+        text-shadow: 0 2px 3px #000;
+        pointer-events: none;
+      }
+      #hud b {
+        color: #fff;
+        min-width: 3ch;
+        display: inline-block;
+        text-align: right;
+      }
+      #hud .low {
+        color: #ff5040;
+      }
+
+      #message {
+        position: fixed;
+        left: 50%;
+        top: 38%;
+        transform: translate(-50%, -50%);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: #ffdd66;
+        font-size: 38px;
+        text-shadow: 0 2px 4px #000;
+        text-align: center;
+        pointer-events: none;
+      }
+      #message.hidden {
+        display: none;
+      }
+      #message small {
+        display: block;
+        font-size: 16px;
+        margin-top: 12px;
+        color: #fff;
+        opacity: 0.8;
+      }
+
+      #damage {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at center, transparent 40%, rgba(255, 0, 0, 0.55) 100%);
+        opacity: 0;
+        transition: opacity 0.12s ease-out;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="help">
+      <div>Déplacement : <kbd>Z</kbd> <kbd>Q</kbd> <kbd>S</kbd> <kbd>D</kbd> (ou WASD)</div>
+      <div>Saut : <kbd>Espace</kbd> · Vue : souris</div>
+      <div><kbd>Clic</kbd> : verrouiller la souris / tirer</div>
+      <div>Arme : <kbd>1</kbd> pistolet · <kbd>2</kbd> fusil · <kbd>M</kbd> son</div>
+    </div>
+    <div id="crosshair"></div>
+    <div id="hud">
+      <span>PV <b id="hp">100</b></span>
+      <span><b id="weapon">PISTOLET</b> <b id="ammo">50</b></span>
+      <span>TUÉS <b id="kills">0</b></span>
+    </div>
+    <div id="damage"></div>
+    <div id="message" class="hidden"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

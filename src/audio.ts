@@ -84,46 +84,82 @@ function volumeFor(distance: number, max = 20): number {
 export function playPistol() {
   if (!ctx || muted) return;
   const t = now();
-  const n = noise();
+
+  // Crack transient (high-passed noise burst)
+  const n1 = noise();
   const hp = ctx.createBiquadFilter();
   hp.type = 'highpass';
-  hp.frequency.value = 700;
-  const ng = env(master!, 0.55, 0.001, 0.07, t);
-  n.connect(hp).connect(ng);
-  n.start(t);
-  n.stop(t + 0.1);
+  hp.frequency.value = 1800;
+  const g1 = env(master!, 0.75, 0.0005, 0.04, t);
+  n1.connect(hp).connect(g1);
+  n1.start(t);
+  n1.stop(t + 0.06);
 
-  const osc = ctx.createOscillator();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(220, t);
-  osc.frequency.exponentialRampToValueAtTime(60, t + 0.08);
-  const og = env(master!, 0.5, 0.001, 0.08, t);
-  osc.connect(og);
-  osc.start(t);
-  osc.stop(t + 0.1);
+  // Body — pitched downward triangle
+  const body = ctx.createOscillator();
+  body.type = 'triangle';
+  body.frequency.setValueAtTime(420, t);
+  body.frequency.exponentialRampToValueAtTime(85, t + 0.07);
+  const gb = env(master!, 0.6, 0.001, 0.09, t);
+  body.connect(gb);
+  body.start(t);
+  body.stop(t + 0.12);
+
+  // Sub punch
+  const sub = ctx.createOscillator();
+  sub.type = 'square';
+  sub.frequency.setValueAtTime(140, t);
+  sub.frequency.exponentialRampToValueAtTime(60, t + 0.04);
+  const gs = env(master!, 0.45, 0.0005, 0.04, t);
+  sub.connect(gs);
+  sub.start(t);
+  sub.stop(t + 0.06);
 }
 
 export function playShotgun() {
   if (!ctx || muted) return;
   const t = now();
-  const n = noise();
+
+  // Sharp opening crack
+  const crack = noise();
+  const hp = ctx.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 2400;
+  const gc = env(master!, 0.65, 0.0005, 0.05, t);
+  crack.connect(hp).connect(gc);
+  crack.start(t);
+  crack.stop(t + 0.07);
+
+  // Main blast — wide noise sweeping into low-mids
+  const blast = noise();
   const lp = ctx.createBiquadFilter();
   lp.type = 'lowpass';
-  lp.frequency.setValueAtTime(2400, t);
-  lp.frequency.exponentialRampToValueAtTime(350, t + 0.2);
-  const ng = env(master!, 0.85, 0.001, 0.22, t);
-  n.connect(lp).connect(ng);
-  n.start(t);
-  n.stop(t + 0.25);
+  lp.frequency.setValueAtTime(3800, t);
+  lp.frequency.exponentialRampToValueAtTime(220, t + 0.28);
+  const gB = env(master!, 0.95, 0.001, 0.3, t);
+  blast.connect(lp).connect(gB);
+  blast.start(t);
+  blast.stop(t + 0.34);
 
-  const osc = ctx.createOscillator();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(130, t);
-  osc.frequency.exponentialRampToValueAtTime(38, t + 0.18);
-  const og = env(master!, 0.7, 0.001, 0.18, t);
-  osc.connect(og);
-  osc.start(t);
-  osc.stop(t + 0.22);
+  // Sub boom
+  const boom = ctx.createOscillator();
+  boom.type = 'sine';
+  boom.frequency.setValueAtTime(160, t);
+  boom.frequency.exponentialRampToValueAtTime(32, t + 0.24);
+  const go = env(master!, 0.9, 0.001, 0.24, t);
+  boom.connect(go);
+  boom.start(t);
+  boom.stop(t + 0.28);
+
+  // Tail rumble
+  const tail = noise();
+  const lp2 = ctx.createBiquadFilter();
+  lp2.type = 'lowpass';
+  lp2.frequency.value = 200;
+  const gt = env(master!, 0.35, 0.04, 0.32, t + 0.08);
+  tail.connect(lp2).connect(gt);
+  tail.start(t + 0.08);
+  tail.stop(t + 0.5);
 }
 
 export function playEmpty() {

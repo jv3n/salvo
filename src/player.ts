@@ -13,6 +13,7 @@ export type Player = {
 const HEIGHT = 1.7;
 const RADIUS = 0.32;
 const MOVE_SPEED = 5;
+const SPRINT_MULTIPLIER = 1.7;
 const JUMP_SPEED = 7;
 const GRAVITY = -25;
 
@@ -33,7 +34,13 @@ export function createPlayer(
   return { body, collider, controller, vy: 0, hp: 100, alive: true };
 }
 
-export function updatePlayer(p: Player, keys: Set<string>, dt: number, yaw: number) {
+export function updatePlayer(
+  p: Player,
+  keys: Set<string>,
+  dt: number,
+  yaw: number,
+  sprinting: boolean,
+) {
   if (!p.alive) return;
   const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
   const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
@@ -42,7 +49,8 @@ export function updatePlayer(p: Player, keys: Set<string>, dt: number, yaw: numb
   if (keys.has('KeyS')) wish.sub(forward);
   if (keys.has('KeyD')) wish.add(right);
   if (keys.has('KeyA')) wish.sub(right);
-  if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(MOVE_SPEED);
+  const speed = sprinting ? MOVE_SPEED * SPRINT_MULTIPLIER : MOVE_SPEED;
+  if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(speed);
 
   const grounded = p.controller.computedGrounded();
   if (grounded && p.vy < 0) p.vy = 0;

@@ -61,6 +61,68 @@ export function floorTexture(): THREE.CanvasTexture {
   });
 }
 
+export function grassTexture(): THREE.CanvasTexture {
+  return makeCanvasTexture(64, (ctx) => {
+    ctx.fillStyle = '#3f6a2a';
+    ctx.fillRect(0, 0, 64, 64);
+    for (let i = 0; i < 500; i++) {
+      const x = (Math.random() * 64) | 0;
+      const y = (Math.random() * 64) | 0;
+      const shade = Math.random();
+      ctx.fillStyle = shade < 0.5 ? '#2e5520' : '#558a38';
+      ctx.fillRect(x, y, 1, 2);
+    }
+    for (let i = 0; i < 60; i++) {
+      const x = (Math.random() * 64) | 0;
+      const y = (Math.random() * 64) | 0;
+      ctx.fillStyle = '#92aa3a';
+      ctx.fillRect(x, y, 1, 1);
+    }
+    for (let i = 0; i < 20; i++) {
+      const x = (Math.random() * 64) | 0;
+      const y = (Math.random() * 64) | 0;
+      ctx.fillStyle = '#7a5028';
+      ctx.fillRect(x, y, 1, 1);
+    }
+  });
+}
+
+export function portalTexture(): THREE.CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const ctx = c.getContext('2d')!;
+  const grad = ctx.createRadialGradient(64, 64, 4, 64, 64, 64);
+  grad.addColorStop(0, '#ffffff');
+  grad.addColorStop(0.15, '#aaccff');
+  grad.addColorStop(0.45, '#5577ff');
+  grad.addColorStop(0.85, '#1a1a55');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 128, 128);
+  ctx.strokeStyle = 'rgba(220,230,255,0.55)';
+  ctx.lineWidth = 1.4;
+  for (let i = 0; i < 5; i++) {
+    ctx.beginPath();
+    const a0 = (i / 5) * Math.PI * 2;
+    let started = false;
+    for (let r = 6; r < 60; r += 1.5) {
+      const a = a0 + r * 0.1;
+      const x = 64 + Math.cos(a) * r;
+      const y = 64 + Math.sin(a) * r;
+      if (!started) {
+        ctx.moveTo(x, y);
+        started = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 export function ceilingTexture(): THREE.CanvasTexture {
   return makeCanvasTexture(64, (ctx) => {
     ctx.fillStyle = '#1a1815';
@@ -116,6 +178,55 @@ export function enemyTexture(state: 'idle' | 'hurt' | 'dead'): THREE.CanvasTextu
   });
 }
 
+export function enemyTextureBite(state: 'idle' | 'hurt' | 'dead'): THREE.CanvasTexture {
+  return makeCanvasTexture(64, (ctx) => {
+    ctx.clearRect(0, 0, 64, 64);
+    if (state === 'dead') {
+      ctx.fillStyle = '#9a6868';
+      ctx.fillRect(10, 52, 36, 8);
+      ctx.beginPath();
+      ctx.arc(46, 56, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#7a5050';
+      ctx.beginPath();
+      ctx.arc(13, 60, 4, 0, Math.PI * 2);
+      ctx.arc(20, 60, 4, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+    const main = state === 'hurt' ? '#ff7a8a' : '#e8889a';
+    const shade = state === 'hurt' ? '#c84858' : '#a85060';
+    ctx.fillStyle = main;
+    ctx.fillRect(24, 22, 16, 32);
+    ctx.beginPath();
+    ctx.arc(32, 18, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = shade;
+    ctx.fillRect(24, 22, 3, 32);
+    ctx.beginPath();
+    ctx.arc(20, 56, 6, 0, Math.PI * 2);
+    ctx.arc(44, 56, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = main;
+    ctx.beginPath();
+    ctx.arc(22, 54, 5, 0, Math.PI * 2);
+    ctx.arc(42, 54, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffee44';
+    ctx.fillRect(27, 14, 3, 3);
+    ctx.fillRect(34, 14, 3, 3);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(28, 15, 1, 2);
+    ctx.fillRect(35, 15, 1, 2);
+    ctx.fillStyle = '#1a0a05';
+    ctx.fillRect(28, 21, 8, 2);
+    ctx.fillStyle = '#ddd';
+    ctx.fillRect(29, 21, 1, 2);
+    ctx.fillRect(32, 21, 1, 2);
+    ctx.fillRect(35, 21, 1, 2);
+  });
+}
+
 export function shotgunTexture(firing: boolean): THREE.CanvasTexture {
   return makeCanvasTexture(128, (ctx) => {
     ctx.clearRect(0, 0, 128, 128);
@@ -156,6 +267,43 @@ export function shotgunTexture(firing: boolean): THREE.CanvasTexture {
       ctx.fill();
     }
   });
+}
+
+export function switchTexture(on: boolean): THREE.CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = 32;
+  c.height = 48;
+  const ctx = c.getContext('2d')!;
+  ctx.fillStyle = '#2a2a30';
+  ctx.fillRect(0, 0, 32, 48);
+  ctx.fillStyle = '#4a4a55';
+  ctx.fillRect(2, 2, 28, 44);
+  ctx.fillStyle = '#1a1a20';
+  ctx.fillRect(4, 4, 24, 40);
+  ctx.fillStyle = '#888';
+  for (const [x, y] of [
+    [5, 5],
+    [25, 5],
+    [5, 41],
+    [25, 41],
+  ] as [number, number][]) {
+    ctx.fillRect(x, y, 2, 2);
+  }
+  ctx.fillStyle = '#0a0a10';
+  ctx.fillRect(11, 16, 10, 20);
+  ctx.fillStyle = on ? '#dddddd' : '#888888';
+  ctx.fillRect(13, on ? 18 : 28, 6, 6);
+  ctx.fillStyle = on ? '#88ff44' : '#552222';
+  ctx.fillRect(14, 10, 4, 3);
+  if (on) {
+    ctx.fillStyle = '#ddffcc';
+    ctx.fillRect(15, 11, 2, 1);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
 export function weaponTexture(firing: boolean): THREE.CanvasTexture {

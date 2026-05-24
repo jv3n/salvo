@@ -22,14 +22,14 @@ Le serveur Vite démarre sur `http://localhost:5173` (port suivant disponible si
 
 ## Scripts
 
-| Commande | Description |
-| --- | --- |
-| `npm run dev` | Serveur de développement avec HMR |
-| `npm run build` | Type-check (`tsc`) puis build de production (`vite build`) |
-| `npm run preview` | Sert le build de production en local |
-| `npm run format` | Formate le code avec Prettier |
-| `npm run format:check` | Vérifie le formatage sans modifier les fichiers |
-| `npx tsc --noEmit` | Type-check sans émettre de fichiers |
+| Commande               | Description                                                |
+| ---------------------- | ---------------------------------------------------------- |
+| `npm run dev`          | Serveur de développement avec HMR                          |
+| `npm run build`        | Type-check (`tsc`) puis build de production (`vite build`) |
+| `npm run preview`      | Sert le build de production en local                       |
+| `npm run format`       | Formate le code avec Prettier                              |
+| `npm run format:check` | Vérifie le formatage sans modifier les fichiers            |
+| `npx tsc --noEmit`     | Type-check sans émettre de fichiers                        |
 
 ## Contrôles
 

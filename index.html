@@ -122,16 +122,40 @@
         transition: opacity 0.12s ease-out;
         pointer-events: none;
       }
+
+      #action-hint {
+        position: fixed;
+        left: 50%;
+        top: calc(50% + 28px);
+        transform: translateX(-50%);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 14px;
+        color: #ffdd66;
+        text-shadow: 0 1px 2px #000;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      #action-hint kbd {
+        background: rgba(0, 0, 0, 0.55);
+        padding: 1px 5px;
+        border-radius: 3px;
+        color: #fff;
+      }
+      #action-hint.hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
     <div id="help">
       <div>Déplacement : <kbd>Z</kbd> <kbd>Q</kbd> <kbd>S</kbd> <kbd>D</kbd> (ou WASD)</div>
-      <div>Saut : <kbd>Espace</kbd> · Vue : souris</div>
+      <div>Saut : <kbd>Espace</kbd> · Courir : <kbd>Shift</kbd> · Vue : souris</div>
       <div><kbd>Clic</kbd> : verrouiller la souris / tirer</div>
       <div>Arme : <kbd>1</kbd> pistolet · <kbd>2</kbd> fusil · <kbd>M</kbd> son</div>
+      <div>Action : <kbd>E</kbd></div>
     </div>
     <div id="crosshair"></div>
+    <div id="action-hint" class="hidden">[<kbd>E</kbd>] Activer</div>
     <div id="hud">
       <span>PV <b id="hp">100</b></span>
       <span><b id="weapon">PISTOLET</b> <b id="ammo">50</b></span>

@@ -1,7 +1,15 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
-import { enemyTexture } from './textures';
+import { enemyTexture, enemyTextureBite } from './textures';
 import type { Player } from './player';
+
+export type EnemyVariant = 'classic' | 'bite';
+
+type EnemyTextures = {
+  idle: THREE.CanvasTexture;
+  hurt: THREE.CanvasTexture;
+  dead: THREE.CanvasTexture;
+};
 
 export type Enemy = {
   sprite: THREE.Sprite;
@@ -9,13 +17,23 @@ export type Enemy = {
   alive: boolean;
   hurtTime: number;
   attackCooldown: number;
+  textures: EnemyTextures;
 };
 
 export const enemies: Enemy[] = [];
 
-const idleTex = enemyTexture('idle');
-const hurtTex = enemyTexture('hurt');
-const deadTex = enemyTexture('dead');
+const textureCache: Record<EnemyVariant, EnemyTextures> = {
+  classic: {
+    idle: enemyTexture('idle'),
+    hurt: enemyTexture('hurt'),
+    dead: enemyTexture('dead'),
+  },
+  bite: {
+    idle: enemyTextureBite('idle'),
+    hurt: enemyTextureBite('hurt'),
+    dead: enemyTextureBite('dead'),
+  },
+};
 
 const SPEED = 1.8;
 const ATTACK_RANGE = 1.4;
@@ -24,13 +42,18 @@ const SIGHT_RANGE = 18;
 const HP = 50;
 const SPRITE_HALF = 0.7;
 
-export function spawnEnemy(scene: THREE.Scene, pos: { x: number; y: number; z: number }) {
-  const mat = new THREE.SpriteMaterial({ map: idleTex, transparent: true, alphaTest: 0.5 });
+export function spawnEnemy(
+  scene: THREE.Scene,
+  pos: { x: number; y: number; z: number },
+  variant: EnemyVariant = 'classic',
+) {
+  const textures = textureCache[variant];
+  const mat = new THREE.SpriteMaterial({ map: textures.idle, transparent: true, alphaTest: 0.5 });
   const sprite = new THREE.Sprite(mat);
   sprite.scale.set(1.4, 1.4, 1);
   sprite.position.set(pos.x, pos.y + SPRITE_HALF, pos.z);
   scene.add(sprite);
-  enemies.push({ sprite, hp: HP, alive: true, hurtTime: 0, attackCooldown: 0 });
+  enemies.push({ sprite, hp: HP, alive: true, hurtTime: 0, attackCooldown: 0, textures });
 }
 
 export function updateEnemies(
@@ -45,7 +68,7 @@ export function updateEnemies(
     if (e.hurtTime > 0) {
       e.hurtTime -= dt;
       if (e.hurtTime <= 0) {
-        (e.sprite.material as THREE.SpriteMaterial).map = idleTex;
+        (e.sprite.material as THREE.SpriteMaterial).map = e.textures.idle;
         (e.sprite.material as THREE.SpriteMaterial).needsUpdate = true;
       }
     }
@@ -83,14 +106,14 @@ export function hitEnemy(e: Enemy, damage: number): boolean {
   if (e.hp <= 0) {
     e.alive = false;
     const mat = e.sprite.material as THREE.SpriteMaterial;
-    mat.map = deadTex;
+    mat.map = e.textures.dead;
     mat.needsUpdate = true;
     e.sprite.scale.set(1.4, 0.5, 1);
     e.sprite.position.y = 0.25;
     return true;
   }
   const mat = e.sprite.material as THREE.SpriteMaterial;
-  mat.map = hurtTex;
+  mat.map = e.textures.hurt;
   mat.needsUpdate = true;
   e.hurtTime = 0.18;
   return false;
